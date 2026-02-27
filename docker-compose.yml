@@ -1,0 +1,175 @@
+version: '3.8'
+
+services:
+  # ==================== Databases ====================
+  mongodb-user:
+    image: mongo:7.0
+    container_name: mongodb-user
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-user-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=user-service
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+  mongodb-restaurant:
+    image: mongo:7.0
+    container_name: mongodb-restaurant
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb-restaurant-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=restaurant-service
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+  mongodb-order:
+    image: mongo:7.0
+    container_name: mongodb-order
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb-order-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=order-service
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+  mongodb-delivery:
+    image: mongo:7.0
+    container_name: mongodb-delivery
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb-delivery-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=delivery-service
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+  # ==================== Message Broker ====================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== Microservices ====================
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb-user:27017/user-service
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - JWT_EXPIRATION=3600s
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb-user:
+        condition: service_started
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+  restaurant-service:
+    build:
+      context: ./restaurant-service
+      dockerfile: Dockerfile
+    container_name: restaurant-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - MONGODB_URI=mongodb://mongodb-restaurant:27017/restaurant-service
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb-restaurant:
+        condition: service_started
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - MONGODB_URI=mongodb://mongodb-order:27017/order-service
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb-order:
+        condition: service_started
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+  delivery-service:
+    build:
+      context: ./delivery-service
+      dockerfile: Dockerfile
+    container_name: delivery-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - MONGODB_URI=mongodb://mongodb-delivery:27017/delivery-service
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb-delivery:
+        condition: service_started
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+
+# ==================== Networks ====================
+networks:
+  food-ordering-network:
+    driver: bridge
+
+# ==================== Volumes ====================
+volumes:
+  mongodb-user-data:
+  mongodb-restaurant-data:
+  mongodb-order-data:
+  mongodb-delivery-data:
+  rabbitmq-data:

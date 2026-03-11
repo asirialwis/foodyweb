@@ -20,8 +20,13 @@ async function bootstrap() {
     },
   });
 
-  // Security middleware
-  app.use(helmet());
+  // Security middleware (CSP disabled to allow Swagger UI)
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   // Rate limiting
   app.use(

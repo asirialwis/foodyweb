@@ -1,0 +1,86 @@
+version: '3.8'
+
+# ============================================================
+# Production Docker Compose - Azure Deployment
+# Uses Azure Container Registry images + managed services
+# ============================================================
+# Usage:
+#   1. Copy .env.azure to .env and fill in values
+#   2. docker-compose -f docker-compose.azure.yml up -d
+
+services:
+  # ==================== Microservices ====================
+  # No local MongoDB or RabbitMQ — uses Azure managed services
+  
+  user-service:
+    image: ${ACR_LOGIN_SERVER}/user-service:${IMAGE_TAG:-latest}
+    container_name: user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_USER_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=3600s
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  restaurant-service:
+    image: ${ACR_LOGIN_SERVER}/restaurant-service:${IMAGE_TAG:-latest}
+    container_name: restaurant-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_RESTAURANT_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  order-service:
+    image: ${ACR_LOGIN_SERVER}/order-service:${IMAGE_TAG:-latest}
+    container_name: order-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_ORDER_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  delivery-service:
+    image: ${ACR_LOGIN_SERVER}/delivery-service:${IMAGE_TAG:-latest}
+    container_name: delivery-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_DELIVERY_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

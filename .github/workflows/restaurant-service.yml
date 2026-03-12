@@ -13,6 +13,8 @@ on:
 env:
   SERVICE_NAME: restaurant-service
   DOCKER_IMAGE: food-ordering-app/restaurant-service
+  AWS_REGION: ap-southeast-1
+  ECS_CLUSTER: food-ordering-cluster
 
 jobs:
   test:

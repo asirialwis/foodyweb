@@ -1,0 +1,100 @@
+# ==============================================================
+# Production Docker Compose - AWS EC2 / VPS Deployment
+# ==============================================================
+# Uses managed services:
+#   - MongoDB Atlas (cloud database)
+#   - Amazon MQ / CloudAMQP (managed RabbitMQ)
+#   - AWS ECR (container registry)
+#
+# Usage:
+#   1. Set environment variables or create .env file
+#   2. docker-compose -f docker-compose.prod.yml up -d
+# ==============================================================
+
+version: '3.8'
+
+services:
+  user-service:
+    image: ${ECR_REGISTRY:-your-account-id.dkr.ecr.ap-southeast-1.amazonaws.com}/food-ordering-app/user-service:latest
+    container_name: user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGODB_URI=${MONGODB_USER_URI:-mongodb+srv://username:password@cluster.mongodb.net/user-service}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=3600s
+      - RABBITMQ_URL=${RABBITMQ_URL:-amqps://username:password@broker-id.mq.ap-southeast-1.amazonaws.com:5671}
+      - NODE_ENV=production
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  restaurant-service:
+    image: ${ECR_REGISTRY:-your-account-id.dkr.ecr.ap-southeast-1.amazonaws.com}/food-ordering-app/restaurant-service:latest
+    container_name: restaurant-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - MONGODB_URI=${MONGODB_RESTAURANT_URI:-mongodb+srv://username:password@cluster.mongodb.net/restaurant-service}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - RABBITMQ_URL=${RABBITMQ_URL:-amqps://username:password@broker-id.mq.ap-southeast-1.amazonaws.com:5671}
+      - NODE_ENV=production
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  order-service:
+    image: ${ECR_REGISTRY:-your-account-id.dkr.ecr.ap-southeast-1.amazonaws.com}/food-ordering-app/order-service:latest
+    container_name: order-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - MONGODB_URI=${MONGODB_ORDER_URI:-mongodb+srv://username:password@cluster.mongodb.net/order-service}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - RABBITMQ_URL=${RABBITMQ_URL:-amqps://username:password@broker-id.mq.ap-southeast-1.amazonaws.com:5671}
+      - NODE_ENV=production
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  delivery-service:
+    image: ${ECR_REGISTRY:-your-account-id.dkr.ecr.ap-southeast-1.amazonaws.com}/food-ordering-app/delivery-service:latest
+    container_name: delivery-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - MONGODB_URI=${MONGODB_DELIVERY_URI:-mongodb+srv://username:password@cluster.mongodb.net/delivery-service}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - RABBITMQ_URL=${RABBITMQ_URL:-amqps://username:password@broker-id.mq.ap-southeast-1.amazonaws.com:5671}
+      - NODE_ENV=production
+    networks:
+      - food-ordering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  food-ordering-network:
+    driver: bridge

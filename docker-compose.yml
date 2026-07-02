@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # ==================== Databases ====================
@@ -70,7 +70,7 @@ services:
       - food-ordering-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,7 +85,7 @@ services:
       - "3001:3001"
     environment:
       - PORT=3001
-      - MONGODB_URI=mongodb://mongodb-user:27017/user-service
+      - MONGODB_URI=mongodb://yohanchristmith_db_user:3v0EIW09j3Luew5Y@ac-ccymxzl-shard-00-00.lnhedlm.mongodb.net:27017,ac-ccymxzl-shard-00-01.lnhedlm.mongodb.net:27017,ac-ccymxzl-shard-00-02.lnhedlm.mongodb.net:27017/user-service-db?ssl=true&replicaSet=atlas-xg6nt3-shard-0&authSource=admin&retryWrites=true&w=majority
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - JWT_EXPIRATION=3600s
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
@@ -107,7 +107,7 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
-      - MONGODB_URI=mongodb://mongodb-restaurant:27017/restaurant-service
+      - MONGODB_URI=mongodb+srv://chamaththilakarathna10_db_user:foodxpressrestaurant@restaurantservice.drpu8ws.mongodb.net/
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
@@ -128,7 +128,7 @@ services:
       - "3003:3003"
     environment:
       - PORT=3003
-      - MONGODB_URI=mongodb://mongodb-order:27017/order-service
+      - MONGODB_URI=mongodb+srv://asirialwis:nest6904@cluster0.bytvj.mongodb.net/order-service?retryWrites=true&w=majority
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
@@ -149,7 +149,7 @@ services:
       - "3004:3004"
     environment:
       - PORT=3004
-      - MONGODB_URI=mongodb://mongodb-delivery:27017/delivery-service
+      - MONGODB_URI=mongodb+srv://krashmina612_db_user:abcd1234@deliveryservicecluster.zultgnk.mongodb.net/delivery-service?retryWrites=true&w=majority
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:

@@ -16,7 +16,7 @@ import { HealthModule } from './health/health.module';
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>(
           'MONGODB_URI',
-          'mongodb://localhost:27017/user-service',
+          'mongodb://yohanchristmith_db_user:3v0EIW09j3Luew5Y@ac-ccymxzl-shard-00-00.lnhedlm.mongodb.net:27017,ac-ccymxzl-shard-00-01.lnhedlm.mongodb.net:27017,ac-ccymxzl-shard-00-02.lnhedlm.mongodb.net:27017/user-service-db?ssl=true&replicaSet=atlas-xg6nt3-shard-0&authSource=admin&retryWrites=true&w=majority',
         ),
       }),
       inject: [ConfigService],

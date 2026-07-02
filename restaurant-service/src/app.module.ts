@@ -14,7 +14,7 @@ import { RmqModule } from './rmq/rmq.module';
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>(
           'MONGODB_URI',
-          'mongodb://localhost:27017/restaurant-service',
+          'mongodb+srv://chamaththilakarathna10_db_user:foodxpressrestaurant@restaurantservice.drpu8ws.mongodb.net/',
         ),
       }),
       inject: [ConfigService],

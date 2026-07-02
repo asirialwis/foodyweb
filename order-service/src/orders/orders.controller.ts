@@ -130,15 +130,6 @@ export class OrdersController {
     });
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get order by ID' })
-  @ApiParam({ name: 'id', description: 'Order ID' })
-  @ApiResponse({ status: 200, description: 'Order details' })
-  @ApiResponse({ status: 404, description: 'Order not found' })
-  findById(@Param('id') id: string) {
-    return this.ordersService.findById(id);
-  }
-
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get orders by user ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
@@ -153,6 +144,15 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'List of restaurant orders' })
   findByRestaurantId(@Param('restaurantId') restaurantId: string) {
     return this.ordersService.findByRestaurantId(restaurantId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get order by ID' })
+  @ApiParam({ name: 'id', description: 'Order ID' })
+  @ApiResponse({ status: 200, description: 'Order details' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  findById(@Param('id') id: string) {
+    return this.ordersService.findById(id);
   }
 
   @Patch(':id/status')
